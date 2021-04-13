@@ -4,16 +4,16 @@ const dateFormat = require('../utils/dateFormat');
 
 const ReactionSchema = new Schema(
     {
-      replyId:{
+      reactionId:{
         type: Schema.Types.ObjectId,
         default: () => new Types.ObjectId()
       },
-      replyBody: {
+      reactionBody: {
         type: String,
         required: true,
         trim: true
       },
-      writtenBy: {
+      username: {
         type: String,
         required: true,
         trim: true
@@ -35,19 +35,22 @@ const ThoughtSchema = new Schema({
     username: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        ref: 'User'
     },
     thoughtText: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        minlength: 1,
+        maxlength: 280,
       },
       createdAt: {
         type: Date,
         default: Date.now,
         get: createdAtVal => dateFormat(createdAtVal)
       },
-    //   replies:[ReplySchema]
+      replies:[ReactionSchema]
     },
     {
       toJSON: {
@@ -60,5 +63,10 @@ const ThoughtSchema = new Schema({
 
 
 const Thought = model('Thought', ThoughtSchema);
+
+  // get total count of friends on retrieval
+  ThoughtSchema.virtual('reactionCount').get(function() {
+    return this.reactions.length;
+  });
 
 module.exports = Thought;
